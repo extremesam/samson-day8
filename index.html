@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>OpenStreetMap Tribute — The Open-Data Heroes</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+  html,body,#map{height:100%;margin:0;padding:0}
+  body{
+    font-family: 'Inter', system-ui, sans-serif;
+    background:#0b1021;
+    color:#f0f8ff;
+    overflow:hidden;
+  }
+  #map{
+    filter:grayscale(20%) brightness(1.05) saturate(120%);
+  }
+
+  /* Glow overlay for the tribute lights */
+  .light{
+    width:10px;height:10px;border-radius:50%;
+    background:rgba(255,255,255,0.2);
+    box-shadow:0 0 10px 3px rgba(173,216,230,0.6);
+    animation: flicker 2.8s infinite ease-in-out alternate;
+  }
+  @keyframes flicker{
+    0%{opacity:.3;transform:scale(.7)}
+    50%{opacity:.8;transform:scale(1.2)}
+    100%{opacity:.4;transform:scale(1)}
+  }
+
+  .tribute{
+    position:absolute;bottom:0;left:0;right:0;padding:12px;text-align:center;
+    background:linear-gradient(180deg,rgba(11,16,33,0),rgba(11,16,33,0.9));
+    color:#9ee9ff;
+    font-size:14px;
+    letter-spacing:0.4px;
+    z-index:6000;
+  }
+
+  .tribute strong{
+    color:#fff;
+    text-shadow:0 0 10px rgba(0,200,255,0.7);
+  }
+
+  .header{
+    position:absolute;top:14px;left:14px;z-index:6000;
+    background:rgba(255,255,255,0.05);padding:8px 12px;border-radius:10px;
+    font-size:13px;backdrop-filter:blur(6px);
+  }
+
+  .leaflet-popup-content-wrapper{
+    background:rgba(10,25,60,0.9);
+    color:#a8e4ff;
+  }
+</style>
+</head>
+<body>
+  <div id="map"></div>
+  <div class="header">💫 OpenStreetMap Tribute</div>
+  <div class="tribute">
+    Thanks to the open-data heroes of <strong>@OpenStreetMap</strong> —
+    mapping the planet, one edit at a time.
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map', {
+      zoomControl:true,
+      minZoom:2,
+      maxZoom:18,
+    }).setView([20,0],2);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+      attribution:'© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Create glowing points of gratitude
+    const coords=[
+      [48.8566,2.3522],[51.5074,-0.1278],[40.7128,-74.0060],
+      [35.6895,139.6917],[6.5244,3.3792],[34.0522,-118.2437],
+      [-33.8688,151.2093],[55.7558,37.6176],[19.4326,-99.1332],
+      [52.5200,13.4050],[-1.2921,36.8219],[59.3293,18.0686]
+    ];
+
+    coords.forEach((c,i)=>{
+      const icon = L.divIcon({className:'',html:'<div class=\"light\"></div>',iconSize:[10,10]});
+      const m = L.marker(c,{icon}).addTo(map);
+      const names = [
+        'a mapper in Paris','a cyclist in London','a coder in New York',
+        'a data nerd in Tokyo','a GIS analyst in Lagos','a volunteer in LA',
+        'a cartographer in Sydney','a historian in Moscow','a student in Mexico City',
+        'a contributor in Berlin','a fieldworker in Nairobi','a planner in Stockholm'
+      ];
+      m.bindPopup(`🌍 Thanks to ${names[i]} for making OSM brighter.`);
+    });
+
+    // A soft, animated pulse ring at map center
+    const pulse = L.circleMarker(map.getCenter(),{
+      radius:60,
+      color:'#00ffbf',
+      opacity:0.1,
+      fillColor:'#00ffbf',
+      fillOpacity:0.05,
+      weight:2
+    }).addTo(map);
+
+    let t=0;
+    function animate(){
+      t+=0.02;
+      const r=60+20*Math.sin(t);
+      pulse.setRadius(r);
+      requestAnimationFrame(animate);
+    }
+    animate();
+
+    // Gentle fly-in movement on load
+    map.flyTo([0,0],2,{duration:3});
+  </script>
+</body>
+</html>
